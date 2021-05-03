@@ -11,7 +11,7 @@ var _ = require('lodash')
 class langDetect {    
     constructor(models = [], weights = [], franc_opt = 'franc-min') {
         this.models = models;
-        this.modelNums = models.length;
+        this.modelNums = models.length + 1;
         this.weights = weights
         this.langArr = []
         if (franc_opt == 'franc-all') {
@@ -24,7 +24,7 @@ class langDetect {
             franc_in_use = franc_min
         }
         if (weights.length != this.modelNums) {
-            this.weights = Array(this.modelNums).fill(1/modelNums)
+            this.weights = Array(this.modelNums).fill(1/this.modelNums)
         }
     }
 
@@ -35,7 +35,7 @@ class langDetect {
         this.modelNums += 1
         
         if (this.weights.length != this.modelNums) {
-            this.weights = Array(this.modelNums).fill(1/this.modelNums)
+            this.weights = Array(this.modelNums).fill(1/(this.modelNums))
         }
     }
 
@@ -57,7 +57,7 @@ class langDetect {
         });
     }
     
-    async predict(input, idxToUse = Array.from({length: this.modelNums}, (x, i) => i)) {
+    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i)) {
         this.langArr = []
         this.langArr.push(franc(input))
     
@@ -84,8 +84,5 @@ class langDetect {
     }
 }
 
-langDet = new langDetect()
-langDet.addModel('./lid.176.bin')
-langDet.setWeights([0.7, 0.3])
-langDet.predict('Konnichiwa, imamade hanashita koto ga nai koto ni tsuite hanashimashou')
+module.exports.langDetect = langDetect
 
