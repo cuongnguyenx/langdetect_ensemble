@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "fasttext": "^1.0.0",
+    "franc": "^5.0.0",
+    "franc-all": "^6.0.0",
+    "franc-min": "^5.0.0",
+    "langs": "^2.0.0",
+    "lodash": "^4.17.21"
+  }
+}
