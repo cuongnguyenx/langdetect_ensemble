@@ -2,7 +2,7 @@
 
 # langdetect-ensemble
 
-> Detect the language of text, support ensembling of multiple models through fastText
+> Detect the language of text, support ensembling of multiple models through fastText. langdetect-ensemble uses [Franc](https://github.com/wooorm/franc) by default in case no language models are loaded
 
 
 ## Install
@@ -13,6 +13,44 @@ npm:
 npm install langdetect-ensemble
 
 ```
+## Usage
+Loading the library:
+
+```sh
+var fs = require('fs'); // Use to automatically load all models from given folder
+var lang = require('langdetect-ensemble')
+```
+
+Initializing LangDetect object:
+
+```sh
+var dir_models = __dirname + '/path/to/your/model/folder/'
+langDet = new lang.langDetect()
+
+fs.readdirSync(dir_models).forEach(function(file) {
+      let model_file = dir_models +'/'+file;
+      try {
+        langDet.addModel(model_file)
+      } catch (error) {
+        console.log(error);
+      }
+  });
+```
+
+Setting weights of model:
+```sh 
+langDet.addModel('./lid.176.ftz')
+langDet.setWeights([0.3, 0.7]) // Here, a vote by franc counts for 0.3, and a vote by the FastText model counts for 0.7
+```
+
+Using LangDetect object for language detection:
+```sh
+langDet.predict('chào buổi sáng').then((lang) => {
+    console.log(lang);
+    // expected output: 'vie'
+});
+```
+
 ## License
 
 [MIT](https://github.com/cuongnguyenx/langdetect_ensemble) © [Cuong V Nguyen]
