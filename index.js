@@ -12,8 +12,6 @@ class langDetect {
     constructor(models = [], weights = [], franc_opt = 'franc-min') {
         this.models = models;
         this.modelNums = models.length + 1;
-        this.weights = weights
-        this.langArr = []
         if (franc_opt == 'franc-all') {
             franc_in_use = franc_all
         }
@@ -48,37 +46,39 @@ class langDetect {
 
     async predict_helper(i, input) {
         let tag = ""
-        await this.models[i].predict(input).then((res) => {
-            if (res.length > 0) {
-                tag = res[0].label.replace("__label__", "") ; // knives
-                tag = langs.where('1', tag)['2']
-                this.langArr.push(tag)
-            }
-        });
+        const res = await this.models[i].predict(input)
+        if (res.length > 0) {
+            tag = res[0].label.replace("__label__", "");
+            tag = langs.where('1', tag)['2']
+            return Promise.resolve(tag)
+        }
     }
     
     async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i)) {
-        this.langArr = []
-        this.langArr.push(franc(input))
+        let langArr = []
+        let self = this
+        langArr.push(franc(input))
     
         // Iterate through FastText models
         for (const i of idxToUse) {
-            await this.predict_helper(i, input)
+            x = await this.predict_helper(i, input)
+            langArr.push(x)
         }
     
         let scoreDict = {}
     
         let cnt = 0;
-        for (const lang of this.langArr) {
+        for (const lang of langArr) {
             if (!scoreDict.hasOwnProperty(lang)) {
                 scoreDict[lang] = 1 * this.weights[cnt]
             }
             else {
                 scoreDict[lang] += 1 * this.weights[cnt]
             }
-        cnt++
+            cnt++
         }
-        console.log(this.langArr)
+        
+        console.log(langArr)
         let res = _.maxBy(_.keys(scoreDict), function (o) { return scoreDict[o]; });
         return res
     }
