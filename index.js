@@ -6,6 +6,7 @@ var path = require('path')
 var fastText = require('fasttext');
 var langs = require('langs')
 var _ = require('lodash')
+var fs = require('fs')
 
 
 class langDetect {    
@@ -36,6 +37,19 @@ class langDetect {
             this.weights = Array(this.modelNums).fill(1/(this.modelNums))
         }
     }
+    
+    // Add all models from the specified folder
+    addModelFromFolder(folderPath) {
+        let _this = this
+        fs.readdirSync(folderPath).forEach(function(file) {
+        let model_file = dir_models +'/'+file;
+        try {
+            _this.langDet.addModel(model_file)
+        } catch (error) {
+            console.log(error);
+        }
+        });
+    }
 
     
     setWeights(newWeights) {
@@ -61,8 +75,8 @@ class langDetect {
     
         // Iterate through FastText models
         for (const i of idxToUse) {
-            x = await this.predict_helper(i, input)
-            langArr.push(x)
+            const lang_pred = await this.predict_helper(i, input)
+            langArr.push(lang_pred)
         }
     
         let scoreDict = {}
