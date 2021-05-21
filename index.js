@@ -42,7 +42,7 @@ class langDetect {
     addModelFromFolder(folderPath) {
         let _this = this
         fs.readdirSync(folderPath).forEach(function(file) {
-        let model_file = dir_models +'/'+file;
+        let model_file = folderPath +'/'+file;
         try {
             _this.langDet.addModel(model_file)
         } catch (error) {
