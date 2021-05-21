@@ -68,7 +68,7 @@ class langDetect {
         }
     }
     
-    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i)) {
+    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i), debug = false) {
         let langArr = []
         let self = this
         langArr.push(franc(input))
@@ -92,7 +92,9 @@ class langDetect {
             cnt++
         }
         
-        console.log(langArr)
+        if (debug) {
+            console.log(langArr)
+        }
         let res = _.maxBy(_.keys(scoreDict), function (o) { return scoreDict[o]; });
         return res
     }
