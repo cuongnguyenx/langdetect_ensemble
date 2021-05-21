@@ -44,7 +44,7 @@ class langDetect {
         fs.readdirSync(folderPath).forEach(function(file) {
         let model_file = folderPath +'/'+file;
         try {
-            _this.langDet.addModel(model_file)
+            _this.addModel(model_file)
         } catch (error) {
             console.log(error);
         }
