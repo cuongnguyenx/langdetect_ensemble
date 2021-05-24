@@ -83,6 +83,9 @@ class langDetect {
     
         let cnt = 0;
         for (const lang of langArr) {
+            if (lang == 'oth') {
+                continue
+            }
             if (!scoreDict.hasOwnProperty(lang)) {
                 scoreDict[lang] = 1 * this.weights[cnt]
             }
