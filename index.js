@@ -81,7 +81,7 @@ class langDetect {
         }
     }
 
-    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i), debug = true) {
+    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i), debug = false) {
         let langArr = []
         let self = this
         langArr.push(franc(input))
