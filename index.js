@@ -9,7 +9,7 @@ var _ = require('lodash')
 var fs = require('fs')
 
 
-class langDetect {    
+class langDetect {
     constructor(models = [], weights = [], franc_opt = 'franc-min') {
         this.models = models;
         this.modelNums = models.length + 1;
@@ -29,29 +29,35 @@ class langDetect {
 
     // FastText models only
     addModel(filePath) {
-        const model = path.resolve('', filePath)
-        this.models.push(new fastText.Classifier(model))
-        this.modelNums += 1
-        
-        if (this.weights.length != this.modelNums) {
-            this.weights = Array(this.modelNums).fill(1/(this.modelNums))
+        try{
+            const model = path.resolve('', filePath)
+            let clf = new fastText.Classifier(model)
+
+            this.models.push(clf)
+            this.modelNums += 1
+
+            if (this.weights.length != this.modelNums) {
+                this.weights = Array(this.modelNums).fill(1/(this.modelNums))
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
-    
+
     // Add all models from the specified folder
     addModelFromFolder(folderPath) {
         let _this = this
         fs.readdirSync(folderPath).forEach(function(file) {
-        let model_file = folderPath +'/'+file;
-        try {
-            _this.addModel(model_file)
-        } catch (error) {
-            console.log(error);
-        }
+            let model_file = folderPath +'/'+file;
+            try {
+                _this.addModel(model_file)
+            } catch (error) {
+                console.log(error);
+            }
         });
     }
 
-    
+
     setWeights(newWeights) {
         if (newWeights.length == this.modelNums) {
             this.weights = newWeights
@@ -59,28 +65,38 @@ class langDetect {
     }
 
     async predict_helper(i, input) {
-        let tag = ""
-        const res = await this.models[i].predict(input)
+        let currClf = this.models[i]
+
+        let res = await currClf.predict(input)
+
         if (res.length > 0) {
-            tag = res[0].label.replace("__label__", "");
-            tag = langs.where('1', tag)['2']
+            let tag = res[0].label.replace("__label__", "");
+            if (tag != 'oth') {
+                tag = langs.where('1', tag)['2']
+            }
             return Promise.resolve(tag)
         }
+        else {
+            return Promise.resolve("und")
+        }
     }
-    
-    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i), debug = false) {
+
+    async predict(input, idxToUse = Array.from({length: this.modelNums - 1}, (x, i) => i), debug = true) {
         let langArr = []
         let self = this
         langArr.push(franc(input))
-    
+
         // Iterate through FastText models
         for (const i of idxToUse) {
             const lang_pred = await this.predict_helper(i, input)
-            langArr.push(lang_pred)
+            if (typeof lang_pred !== 'undefined') {
+                langArr.push(lang_pred)
+            }
+
         }
-    
+
         let scoreDict = {}
-    
+
         let cnt = 0;
         for (const lang of langArr) {
             if (lang == 'oth') {
@@ -94,7 +110,7 @@ class langDetect {
             }
             cnt++
         }
-        
+
         if (debug) {
             console.log(langArr)
         }
